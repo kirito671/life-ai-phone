@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#34bfa3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="生活AI化">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="stylesheet" href="./style.css">
+<title>生活AI化</title>
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-mark">AI</div>
+    <div>
+      <h1>生活AI化</h1>
+      <p>把一天变成可复盘的数据</p>
+    </div>
+  </div>
+  <input type="date" id="datePicker" aria-label="选择日期">
+</header>
+
+<main class="app-main">
+  <section class="view active" id="view-dashboard">
+    <div class="hello">
+      <div>
+        <p class="eyebrow" id="dateLabel"></p>
+        <h2>今日概览</h2>
+        <p class="sub">用数据看见今天。</p>
+      </div>
+      <button class="primary-btn" id="jumpRecord">＋ 记录</button>
+    </div>
+
+    <div class="metrics">
+      <article class="metric-card mint">
+        <div class="metric-top"><span>🥩</span><b>蛋白质</b></div>
+        <div class="metric-value"><strong id="metricProtein">0</strong><span>/ <em id="targetProteinMini">140</em> g</span></div>
+        <div class="bar"><div id="barProtein"></div></div>
+      </article>
+      <article class="metric-card sky">
+        <div class="metric-top"><span>🌙</span><b>睡眠</b></div>
+        <div class="metric-value"><strong id="metricSleep">0</strong><span>/ <em id="targetSleepMini">7.5</em> h</span></div>
+        <div class="bar"><div id="barSleep"></div></div>
+      </article>
+      <article class="metric-card lilac">
+        <div class="metric-top"><span>🏋️</span><b>训练</b></div>
+        <div class="metric-value"><strong id="metricSets">0</strong><span>组</span></div>
+        <div class="bar"><div id="barTraining"></div></div>
+      </article>
+      <article class="metric-card peach">
+        <div class="metric-top"><span>🎯</span><b>深度工作</b></div>
+        <div class="metric-value"><strong id="metricWork">0</strong><span>/ <em id="targetWorkMini">4</em> h</span></div>
+        <div class="bar"><div id="barWork"></div></div>
+      </article>
+    </div>
+
+    <article class="card">
+      <div class="card-head"><div><h3>今日时间线</h3><p>按时间回顾今天的记录</p></div><span class="pill" id="entryCount">0 条</span></div>
+      <div id="timeline" class="timeline empty">还没有记录，点击“记录”开始。</div>
+    </article>
+
+    <article class="card ai-card">
+      <div class="card-head"><div><h3>AI 日报</h3><p>生成提示词，交给任意 AI 复盘</p></div><span class="spark">✦</span></div>
+      <div class="ai-summary" id="aiSummary">记录几条数据后，这里会显示摘要。</div>
+      <button class="primary-btn full" id="dashPromptBtn">生成 AI 提示词</button>
+      <textarea id="dashPrompt" rows="7" placeholder="生成的提示词会显示在这里..."></textarea>
+      <div class="row"><button class="ghost-btn" id="dashCopyBtn">复制提示词</button><button class="ghost-btn" id="dashReportBtn">下载日报</button></div>
+    </article>
+  </section>
+
+  <section class="view" id="view-record">
+    <div class="view-head"><div><h2>快速记录</h2><p>吃饭、训练、睡眠、工作，随手记下来。</p></div></div>
+    <div class="record-tabs" id="recordTabs">
+      <button class="tab active" data-type="food">🍽️ 吃饭</button>
+      <button class="tab" data-type="training">🏋️ 训练</button>
+      <button class="tab" data-type="sleep">🌙 睡眠</button>
+      <button class="tab" data-type="work">💻 工作</button>
+    </div>
+    <article class="card form-card">
+      <div class="card-head"><div><h3 id="formTitle">记录吃饭</h3><p id="formHint">记录每一餐，自动汇总热量和蛋白质。</p></div></div>
+      <form id="recordForm" class="form-grid"></form>
+    </article>
+    <article class="card">
+      <div class="card-head"><div><h3 id="listTitle">今日吃饭记录</h3><p id="listHint">最近记录会显示在这里</p></div><span class="pill" id="listCount">0 条</span></div>
+      <div id="recordList" class="entry-list empty">暂无记录。</div>
+    </article>
+  </section>
+
+  <section class="view" id="view-report">
+    <div class="view-head"><div><h2>AI 日报</h2><p>把一天交给 AI，换一份明天的行动清单。</p></div></div>
+    <article class="card">
+      <div class="card-head"><div><h3>日报提示词</h3><p>复制到 ChatGPT、Claude、Kimi 或豆包。</p></div><button class="primary-btn" id="reportPromptBtn">生成</button></div>
+      <div class="summary-grid" id="reportSummary"></div>
+      <textarea id="reportPrompt" rows="12" placeholder="点击“生成”后显示提示词..."></textarea>
+      <div class="row"><button class="ghost-btn" id="reportCopyBtn">复制提示词</button><button class="primary-btn" id="reportDownloadBtn">下载 Markdown 日报</button></div>
+    </article>
+  </section>
+
+  <section class="view" id="view-settings">
+    <div class="view-head"><div><h2>目标设置</h2><p>目标越清楚，复盘越有用。</p></div></div>
+    <article class="card form-card">
+      <form id="settingsForm" class="form-grid">
+        <label>蛋白质目标（g）<input type="number" id="settingProtein" min="0" step="1"></label>
+        <label>热量缺口目标（kcal）<input type="number" id="settingCalories" min="0" step="1"></label>
+        <label>睡眠目标（h）<input type="number" id="settingSleep" min="0" step="0.1"></label>
+        <label>每周训练（次）<input type="number" id="settingTraining" min="0" step="1"></label>
+        <label>深度工作目标（h）<input type="number" id="settingWork" min="0" step="0.5"></label>
+        <button class="primary-btn" type="submit">保存设置</button>
+      </form>
+    </article>
+    <article class="card">
+      <div class="card-head"><div><h3>数据管理</h3><p>数据默认保存在这台手机的浏览器里。</p></div></div>
+      <div class="row">
+        <button class="ghost-btn" id="exportBtn">导出备份</button>
+        <label class="ghost-btn file-btn">导入备份<input type="file" id="importInput" accept="application/json"></label>
+        <button class="ghost-btn" id="installBtn" style="display:none">安装到手机</button>
+      </div>
+      <p class="muted small">建议每周导出一次备份。换手机时，在新手机上导入备份即可恢复。</p>
+      <button class="danger-link" id="clearDayBtn">清空今天的数据</button>
+    </article>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <button class="bottom-nav-item active" data-view="dashboard"><span>◈</span>首页</button>
+  <button class="bottom-nav-item" data-view="record"><span>＋</span>记录</button>
+  <button class="bottom-nav-item" data-view="report"><span>✦</span>日报</button>
+  <button class="bottom-nav-item" data-view="settings"><span>⚙</span>设置</button>
+</nav>
+<div class="toast" id="toast"></div>
+<script src="./app.js"></script>
+</body>
+</html>

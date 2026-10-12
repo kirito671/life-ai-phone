@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#34bfa3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="生活AI化">
+
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+:root {
+  --bg: #f4faf8;
+  --card: #ffffff;
+  --ink: #1f3d36;
+  --muted: #78968e;
+  --line: #e4efeb;
+  --mint: #34bfa3;
+  --mint-dark: #1d9f86;
+  --mint-soft: #e8f8f3;
+  --sky: #5aa9e6;
+  --sky-soft: #e9f4fd;
+  --lilac: #9b8cff;
+  --lilac-soft: #f0edff;
+  --peach: #ff9f6e;
+  --peach-soft: #fff0e9;
+  --danger: #ef6b6b;
+  --shadow: 0 10px 26px rgba(31, 61, 54, .07);
+  --radius: 18px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; min-height: 100%; overflow-x: hidden; }
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(78px + env(safe-area-inset-bottom));
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.app-header {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-top));
+  background: rgba(244, 250, 248, .92); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1 1 auto; }
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 12px; flex: 0 0 auto;
+  display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 13px;
+  background: linear-gradient(135deg, var(--mint), var(--sky));
+  box-shadow: 0 7px 16px rgba(52,191,163,.28);
+}
+.brand h1 { margin: 0; font-size: 15px; white-space: nowrap; }
+.brand p { display: none; margin: 2px 0 0; color: var(--muted); font-size: 10px; white-space: nowrap; }
+.app-header input[type="date"] { border: 1px solid var(--line); border-radius: 10px; padding: 7px 6px; background: #fff; color: var(--ink); font-size: 11px; max-width: 118px; flex: 0 1 118px; }
+
+.app-main { padding: 14px; max-width: 720px; margin: 0 auto; }
+.view { display: none; }
+.view.active { display: block; animation: fadeUp .22s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+.hello, .view-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+.eyebrow { margin: 0 0 4px; color: var(--mint-dark); font-size: 11px; font-weight: 700; letter-spacing: .7px; }
+.hello h2, .view-head h2 { margin: 0; font-size: 21px; letter-spacing: -.3px; }
+.sub, .view-head p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+
+.primary-btn, .ghost-btn, .file-btn {
+  border: 0; border-radius: 12px; padding: 11px 14px; transition: .15s ease;
+  min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
+}
+.primary-btn { color: #fff; font-weight: 700; background: linear-gradient(135deg, var(--mint), #56cbb2); box-shadow: 0 7px 16px rgba(52,191,163,.22); }
+.primary-btn:active { transform: scale(.98); }
+.ghost-btn, .file-btn { background: #f3faf7; color: var(--mint-dark); font-weight: 700; border: 1px solid #dff0ea; }
+.ghost-btn:active, .file-btn:active { background: #e8f8f3; }
+.full { width: 100%; }
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; font-size: 100px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 15px; margin-bottom: 13px; }
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.card-head h3 { margin: 0; font-size: 15px; }
+.card-head p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+.pill { font-size: 11px; color: var(--mint-dark); background: var(--mint-soft); padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+
+.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 13px; }
+.metric-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 13px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+.metric-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--mint); }
+.metric-card.sky::before { background: var(--sky); }
+.metric-card.lilac::before { background: var(--lilac); }
+.metric-card.peach::before { background: var(--peach); }
+.metric-top { display: flex; align-items: center; gap: 6px; margin-bottom: 9px; }
+.metric-top span { font-size: 15px; }
+.metric-top b { color: var(--muted); font-size: 11px; }
+.metric-value { display: flex; align-items: baseline; gap: 5px; margin-bottom: 9px; }
+.metric-value strong { font-size: 22px; letter-spacing: -.5px; }
+.metric-value span, .metric-value em { color: var(--muted); font-size: 11px; font-style: normal; }
+.bar { height: 6px; border-radius: 999px; background: #eef5f2; overflow: hidden; }
+.bar > div { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--mint), #6fd8c0); transition: width .35s ease; }
+.metric-card.sky .bar > div { background: linear-gradient(90deg, var(--sky), #8dc8f0); }
+.metric-card.lilac .bar > div { background: linear-gradient(90deg, var(--lilac), #bdb2ff); }
+.metric-card.peach .bar > div { background: linear-gradient(90deg, var(--peach), #ffc09a); }
+
+.timeline { display: flex; flex-direction: column; gap: 8px; }
+.timeline.empty, .entry-list.empty { color: var(--muted); font-size: 12px; text-align: center; padding: 16px 0; }
+.timeline-item { display: flex; gap: 10px; padding: 9px; border-radius: 13px; }
+.timeline-item:active { background: #f7fbfa; }
+.timeline-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--mint-soft); flex: 0 0 auto; }
+.timeline-icon.training { background: var(--lilac-soft); }
+.timeline-icon.sleep { background: var(--sky-soft); }
+.timeline-icon.work { background: var(--peach-soft); }
+.timeline-icon.note { background: #f2f5f4; }
+.timeline-body { flex: 1; min-width: 0; }
+.timeline-title { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+.timeline-meta { color: var(--muted); font-size: 11px; line-height: 1.45; word-break: break-word; }
+.timeline-time { color: var(--muted); font-size: 10px; white-space: nowrap; margin-top: 2px; }
+.delete-btn { border: 0; background: transparent; color: #b9cfc8; font-size: 17px; padding: 4px 5px; border-radius: 8px; }
+.delete-btn:active { color: var(--danger); background: #fff1f1; }
+
+.record-tabs { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 3px; margin-bottom: 11px; scrollbar-width: none; }
+.record-tabs::-webkit-scrollbar { display: none; }
+.tab { border: 1px solid var(--line); background: #fff; color: #58756d; border-radius: 999px; padding: 9px 12px; font-weight: 700; white-space: nowrap; font-size: 12px; min-height: 40px; }
+.tab.active { background: var(--mint); border-color: var(--mint); color: #fff; box-shadow: 0 6px 14px rgba(52,191,163,.18); }
+
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 11px; }
+.form-grid label { display: flex; flex-direction: column; gap: 5px; color: #4e6c64; font-size: 12px; font-weight: 700; }
+.form-grid input, .form-grid select, .form-grid textarea { width: 100%; border: 1px solid var(--line); border-radius: 11px; padding: 11px; background: #fbfefd; color: var(--ink); outline: none; min-height: 44px; }
+.form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus { border-color: var(--mint); box-shadow: 0 0 0 3px rgba(52,191,163,.12); background: #fff; }
+.form-grid button { grid-column: span 1; }
+
+.entry-list { display: flex; flex-direction: column; gap: 8px; }
+.entry-item { display: flex; justify-content: space-between; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 13px; background: #fcfefd; }
+.entry-main { min-width: 0; }
+.entry-main strong { display: block; font-size: 12px; margin-bottom: 3px; }
+.entry-main span { color: var(--muted); font-size: 11px; line-height: 1.45; word-break: break-word; }
+
+.ai-card .spark { color: var(--mint); font-size: 18px; }
+.ai-summary { background: #f7fbfa; border: 1px solid var(--line); border-radius: 13px; padding: 11px; color: #5e7d75; font-size: 11px; line-height: 1.65; margin-bottom: 11px; }
+textarea#dashPrompt, textarea#reportPrompt { width: 100%; border: 1px solid var(--line); border-radius: 13px; padding: 11px; background: #fbfefd; color: #35564d; resize: vertical; outline: none; font-family: "Cascadia Code", Consolas, "Courier New", monospace; font-size: 11px; line-height: 1.6; margin-top: 10px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.summary-chip { background: #f7fbfa; border: 1px solid var(--line); border-radius: 12px; padding: 9px; }
+.summary-chip span { display: block; color: var(--muted); font-size: 10px; margin-bottom: 3px; }
+.summary-chip strong { font-size: 14px; }
+.muted { color: var(--muted); }
+.small { font-size: 11px; line-height: 1.6; }
+.danger-link { border: 0; background: transparent; color: var(--danger); font-size: 12px; padding: 8px 0 0; }
+
+.bottom-nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: rgba(255,255,255,.95); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+  padding: 7px 6px calc(7px + env(safe-area-inset-bottom));
+}
+.bottom-nav-item { border: 0; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; padding: 5px 2px; border-radius: 11px; }
+.bottom-nav-item span { font-size: 17px; line-height: 1; }
+.bottom-nav-item.active { color: var(--mint-dark); background: var(--mint-soft); font-weight: 700; }
+
+.toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(14px); background: #1f3d36; color: #fff; border-radius: 12px; padding: 10px 14px; font-size: 12px; opacity: 0; pointer-events: none; transition: .22s ease; z-index: 30; max-width: 86vw; text-align: center; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (min-width: 620px) {
+  .brand p { display: block; }
+  .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-grid button { grid-column: span 2; }
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #101b18; --card: #172622; --ink: #e7f5f0; --muted: #9db8b0; --line: #264039; --mint-soft: #1d3a33; --sky-soft: #1b3040; --lilac-soft: #282445; --peach-soft: #3a2a22; }
+  .app-header { background: rgba(16,27,24,.92); }
+  .bottom-nav { background: rgba(23,38,34,.95); }
+  .app-header input[type="date"], .tab, .form-grid input, .form-grid select, .form-grid textarea, .entry-item { background: #1b2d29; color: var(--ink); }
+  .timeline-item:active, .ghost-btn:active { background: #1d3a33; }
+  .ai-summary, .summary-chip { background: #1b2d29; }
+}
+@media (max-width: 430px) {
+  .brand p { display: none; }
+  .brand h1 { font-size: 14px; }
+  .app-header input[type="date"] { border: 1px solid var(--line); border-radius: 10px; padding: 7px 6px; background: #fff; color: var(--ink); font-size: 11px; max-width: 118px; flex: 0 1 118px; }
+}
+/* final mobile fixes */
+.app-header { flex-wrap: wrap; }
+.bottom-nav { width: 100%; max-width: 100%; }
+</style>
+<title>生活AI化</title>
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-mark">AI</div>
+    <div>
+      <h1>生活AI化</h1>
+      <p>把一天变成可复盘的数据</p>
+    </div>
+  </div>
+  <input type="date" id="datePicker" aria-label="选择日期">
+</header>
+
+<main class="app-main">
+  <section class="view active" id="view-dashboard">
+    <div class="hello">
+      <div>
+        <p class="eyebrow" id="dateLabel"></p>
+        <h2>今日概览</h2>
+        <p class="sub">用数据看见今天。</p>
+      </div>
+      <button class="primary-btn" id="jumpRecord">＋ 记录</button>
+    </div>
+
+    <div class="metrics">
+      <article class="metric-card mint">
+        <div class="metric-top"><span>🥩</span><b>蛋白质</b></div>
+        <div class="metric-value"><strong id="metricProtein">0</strong><span>/ <em id="targetProteinMini">140</em> g</span></div>
+        <div class="bar"><div id="barProtein"></div></div>
+      </article>
+      <article class="metric-card sky">
+        <div class="metric-top"><span>🌙</span><b>睡眠</b></div>
+        <div class="metric-value"><strong id="metricSleep">0</strong><span>/ <em id="targetSleepMini">7.5</em> h</span></div>
+        <div class="bar"><div id="barSleep"></div></div>
+      </article>
+      <article class="metric-card lilac">
+        <div class="metric-top"><span>🏋️</span><b>训练</b></div>
+        <div class="metric-value"><strong id="metricSets">0</strong><span>组</span></div>
+        <div class="bar"><div id="barTraining"></div></div>
+      </article>
+      <article class="metric-card peach">
+        <div class="metric-top"><span>🎯</span><b>深度工作</b></div>
+        <div class="metric-value"><strong id="metricWork">0</strong><span>/ <em id="targetWorkMini">4</em> h</span></div>
+        <div class="bar"><div id="barWork"></div></div>
+      </article>
+    </div>
+
+    <article class="card">
+      <div class="card-head"><div><h3>今日时间线</h3><p>按时间回顾今天的记录</p></div><span class="pill" id="entryCount">0 条</span></div>
+      <div id="timeline" class="timeline empty">还没有记录，点击“记录”开始。</div>
+    </article>
+
+    <article class="card ai-card">
+      <div class="card-head"><div><h3>AI 日报</h3><p>生成提示词，交给任意 AI 复盘</p></div><span class="spark">✦</span></div>
+      <div class="ai-summary" id="aiSummary">记录几条数据后，这里会显示摘要。</div>
+      <button class="primary-btn full" id="dashPromptBtn">生成 AI 提示词</button>
+      <textarea id="dashPrompt" rows="7" placeholder="生成的提示词会显示在这里..."></textarea>
+      <div class="row"><button class="ghost-btn" id="dashCopyBtn">复制提示词</button><button class="ghost-btn" id="dashReportBtn">下载日报</button></div>
+    </article>
+  </section>
+
+  <section class="view" id="view-record">
+    <div class="view-head"><div><h2>快速记录</h2><p>吃饭、训练、睡眠、工作，随手记下来。</p></div></div>
+    <div class="record-tabs" id="recordTabs">
+      <button class="tab active" data-type="food">🍽️ 吃饭</button>
+      <button class="tab" data-type="training">🏋️ 训练</button>
+      <button class="tab" data-type="sleep">🌙 睡眠</button>
+      <button class="tab" data-type="work">💻 工作</button>
+    </div>
+    <article class="card form-card">
+      <div class="card-head"><div><h3 id="formTitle">记录吃饭</h3><p id="formHint">记录每一餐，自动汇总热量和蛋白质。</p></div></div>
+      <form id="recordForm" class="form-grid"></form>
+    </article>
+    <article class="card">
+      <div class="card-head"><div><h3 id="listTitle">今日吃饭记录</h3><p id="listHint">最近记录会显示在这里</p></div><span class="pill" id="listCount">0 条</span></div>
+      <div id="recordList" class="entry-list empty">暂无记录。</div>
+    </article>
+  </section>
+
+  <section class="view" id="view-report">
+    <div class="view-head"><div><h2>AI 日报</h2><p>把一天交给 AI，换一份明天的行动清单。</p></div></div>
+    <article class="card">
+      <div class="card-head"><div><h3>日报提示词</h3><p>复制到 ChatGPT、Claude、Kimi 或豆包。</p></div><button class="primary-btn" id="reportPromptBtn">生成</button></div>
+      <div class="summary-grid" id="reportSummary"></div>
+      <textarea id="reportPrompt" rows="12" placeholder="点击“生成”后显示提示词..."></textarea>
+      <div class="row"><button class="ghost-btn" id="reportCopyBtn">复制提示词</button><button class="primary-btn" id="reportDownloadBtn">下载 Markdown 日报</button></div>
+    </article>
+  </section>
+
+  <section class="view" id="view-settings">
+    <div class="view-head"><div><h2>目标设置</h2><p>目标越清楚，复盘越有用。</p></div></div>
+    <article class="card form-card">
+      <form id="settingsForm" class="form-grid">
+        <label>蛋白质目标（g）<input type="number" id="settingProtein" min="0" step="1"></label>
+        <label>热量缺口目标（kcal）<input type="number" id="settingCalories" min="0" step="1"></label>
+        <label>睡眠目标（h）<input type="number" id="settingSleep" min="0" step="0.1"></label>
+        <label>每周训练（次）<input type="number" id="settingTraining" min="0" step="1"></label>
+        <label>深度工作目标（h）<input type="number" id="settingWork" min="0" step="0.5"></label>
+        <button class="primary-btn" type="submit">保存设置</button>
+      </form>
+    </article>
+    <article class="card">
+      <div class="card-head"><div><h3>数据管理</h3><p>数据默认保存在这台手机的浏览器里。</p></div></div>
+      <div class="row">
+        <button class="ghost-btn" id="exportBtn">导出备份</button>
+        <label class="ghost-btn file-btn">导入备份<input type="file" id="importInput" accept="application/json"></label>
+        <button class="ghost-btn" id="installBtn" style="display:none">安装到手机</button>
+      </div>
+      <p class="muted small">建议每周导出一次备份。换手机时，在新手机上导入备份即可恢复。</p>
+      <button class="danger-link" id="clearDayBtn">清空今天的数据</button>
+    </article>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <button class="bottom-nav-item active" data-view="dashboard"><span>◈</span>首页</button>
+  <button class="bottom-nav-item" data-view="record"><span>＋</span>记录</button>
+  <button class="bottom-nav-item" data-view="report"><span>✦</span>日报</button>
+  <button class="bottom-nav-item" data-view="settings"><span>⚙</span>设置</button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+const STORE_KEY = 'life-ai-store-v1';
+const CONFIG_KEY = 'life-ai-config-v1';
+const DEFAULT_CONFIG = {
+  name: '孙学',
+  targets: { protein_g: 140, calories_deficit_kcal: 600, sleep_hours: 7.5, training_days_per_week: 3, deep_work_hours: 4 },
+  ai: { mode: 'manual', base_url: '', model: '', api_key_env: 'LIFE_AI_API_KEY' }
+};
+
+const state = { date: todayStr(), config: null, entries: [], activeRecordType: 'food', promptPayload: null, deferredPrompt: null };
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+const viewMeta = {
+  dashboard: '今日概览',
+  record: '快速记录',
+  report: 'AI 日报',
+  settings: '目标设置'
+};
+
+const recordConfig = {
+  food: {
+    title: '记录吃饭', hint: '记录每一餐，自动汇总热量和蛋白质。', listTitle: '今日吃饭记录', listHint: '最近记录会显示在这里。', icon: '🍽️',
+    fields: [
+      { name: 'time', label: '时间', type: 'time', required: true },
+      { name: 'meal', label: '餐次', type: 'select', options: ['早餐', '午餐', '晚餐', '加餐'], required: true },
+      { name: 'items', label: '吃了什么', type: 'text', placeholder: '例如：鸡胸肉 + 米饭 + 蔬菜', required: true, span: 2 },
+      { name: 'kcal', label: '热量 kcal', type: 'number', min: 0, step: 1, placeholder: '500' },
+      { name: 'protein_g', label: '蛋白质 g', type: 'number', min: 0, step: 1, placeholder: '35' },
+      { name: 'note', label: '备注', type: 'text', placeholder: '可选', span: 2 }
+    ]
+  },
+  training: {
+    title: '记录训练', hint: '记录动作、组数、次数、重量和 RPE。', listTitle: '今日训练记录', listHint: '训练容量会自动估算。', icon: '🏋️',
+    fields: [
+      { name: 'time', label: '时间', type: 'time', required: true },
+      { name: 'exercise', label: '动作', type: 'text', placeholder: '深蹲 / 卧推 / 跑步', required: true },
+      { name: 'sets', label: '组数', type: 'number', min: 0, step: 1 },
+      { name: 'reps', label: '每组次数', type: 'number', min: 0, step: 1 },
+      { name: 'weight_kg', label: '重量 kg', type: 'number', min: 0, step: 0.5, placeholder: '自重/跑步填 0' },
+      { name: 'rpe', label: 'RPE 1-10', type: 'number', min: 0, max: 10, step: 0.5 },
+      { name: 'note', label: '备注', type: 'text', placeholder: '可选', span: 2 }
+    ]
+  },
+  sleep: {
+    title: '记录睡眠', hint: '记录上床、起床、时长、质量和设备数据。', listTitle: '今日睡眠记录', listHint: '填写上床和起床时间后会自动计算时长。', icon: '🌙',
+    fields: [
+      { name: 'bedtime', label: '上床时间', type: 'time', required: true },
+      { name: 'wake', label: '起床时间', type: 'time', required: true },
+      { name: 'duration_h', label: '睡眠时长 h', type: 'number', min: 0, step: 0.1, placeholder: '可留空' },
+      { name: 'quality', label: '质量 1-5', type: 'number', min: 1, max: 5, step: 1 },
+      { name: 'device_note', label: '设备数据', type: 'text', placeholder: '例如 Oura：7h32m', span: 2 },
+      { name: 'note', label: '备注', type: 'text', placeholder: '可选', span: 2 }
+    ]
+  },
+  work: {
+    title: '记录工作', hint: '记录深度工作时段、产出和干扰。', listTitle: '今日工作记录', listHint: '深度工作总时长会自动汇总。', icon: '💻',
+    fields: [
+      { name: 'start', label: '开始时间', type: 'time', required: true },
+      { name: 'end', label: '结束时间', type: 'time', required: true },
+      { name: 'task', label: '任务', type: 'text', placeholder: '写方案 / 数据分析 / 阅读', required: true, span: 2 },
+      { name: 'output', label: '产出', type: 'text', placeholder: '完成了什么' },
+      { name: 'distraction', label: '干扰', type: 'text', placeholder: '例如微信 20 分钟' },
+      { name: 'note', label: '备注', type: 'text', placeholder: '可选', span: 2 }
+    ]
+  }
+};
+
+function todayStr() {
+  const d = new Date(); const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+function nowTime() {
+  const d = new Date(); const p = n => String(n).padStart(2, '0');
+  return `${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function escapeHtml(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+}
+function formatDateLabel(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  if (Number.isNaN(d.getTime())) return dateStr;
+  const week = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 星期${week}`;
+}
+function num(value) { const n = Number(value); return Number.isFinite(n) ? n : 0; }
+function round(n, digits = 1) { return Math.round(num(n) * Math.pow(10, digits)) / Math.pow(10, digits); }
+function sum(list, key) { return list.reduce((acc, item) => acc + num(item[key]), 0); }
+function hoursBetween(start, end) {
+  if (!start || !end) return 0;
+  const [sh, sm] = String(start).split(':').map(Number);
+  const [eh, em] = String(end).split(':').map(Number);
+  if ([sh, sm, eh, em].some(n => !Number.isFinite(n))) return 0;
+  let a = sh * 60 + sm, b = eh * 60 + em;
+  if (b < a) b += 24 * 60;
+  return (b - a) / 60;
+}
+function toast(message) {
+  const el = $('#toast'); el.textContent = message; el.classList.add('show');
+  clearTimeout(toast._timer); toast._timer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+function setBar(id, percent) { const el = document.getElementById(id); if (el) el.style.width = `${Math.max(0, Math.min(100, percent))}%`; }
+
+function loadStore() {
+  try { const raw = localStorage.getItem(STORE_KEY); const data = raw ? JSON.parse(raw) : null; return data && data.entries ? data : { entries: {} }; }
+  catch { return { entries: {} }; }
+}
+function saveStore(store) { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch { toast('保存失败：浏览器存储空间不足'); } }
+function loadConfig() {
+  try { const raw = localStorage.getItem(CONFIG_KEY); const c = raw ? JSON.parse(raw) : null; return c && c.targets ? c : JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
+  catch { return JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
+}
+function saveConfig(c) { try { localStorage.setItem(CONFIG_KEY, JSON.stringify(c)); } catch { toast('保存失败：浏览器存储空间不足'); } }
+function getEntries(date) { const s = loadStore(); return Array.isArray(s.entries[date]) ? s.entries[date] : []; }
+function setEntries(date, entries) { const s = loadStore(); s.entries[date] = entries; saveStore(s); }
+function addEntry(date, entry) { const entries = getEntries(date); entries.push(entry); setEntries(date, entries); }
+function deleteEntry(date, index) { const entries = getEntries(date); entries.splice(index, 1); setEntries(date, entries); }
+
+function switchView(view) {
+  $$('.view').forEach(el => el.classList.toggle('active', el.id === `view-${view}`));
+  $$('.bottom-nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+  if (view === 'record') renderRecordView();
+  if (view === 'settings') renderSettings();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function renderHeader() { $('#dateLabel').textContent = formatDateLabel(state.date); $('#datePicker').value = state.date; }
+
+function renderMetrics() {
+  const entries = state.entries || [], targets = state.config?.targets || {};
+  const food = entries.filter(e => e.type === 'food'), training = entries.filter(e => e.type === 'training'), sleep = entries.filter(e => e.type === 'sleep'), work = entries.filter(e => e.type === 'work');
+  const protein = sum(food, 'protein_g');
+  const sets = sum(training, 'sets');
+  const sleepHours = sleep.reduce((acc, s) => acc + (num(s.duration_h) || hoursBetween(s.bedtime, s.wake)), 0);
+  const workHours = work.reduce((acc, w) => acc + hoursBetween(w.start, w.end), 0);
+  $('#metricProtein').textContent = round(protein, 1);
+  $('#metricSleep').textContent = round(sleepHours, 2);
+  $('#metricSets').textContent = round(sets, 0);
+  $('#metricWork').textContent = round(workHours, 2);
+  $('#targetProteinMini').textContent = targets.protein_g ?? 140;
+  $('#targetSleepMini').textContent = targets.sleep_hours ?? 7.5;
+  $('#targetWorkMini').textContent = targets.deep_work_hours ?? 4;
+  setBar('barProtein', protein / Math.max(1, num(targets.protein_g)) * 100);
+  setBar('barSleep', sleepHours / Math.max(0.1, num(targets.sleep_hours)) * 100);
+  setBar('barTraining', sets / Math.max(1, num(targets.training_days_per_week) * 3) * 100);
+  setBar('barWork', workHours / Math.max(0.1, num(targets.deep_work_hours)) * 100);
+}
+
+function timelineText(e) {
+  switch (e.type) {
+    case 'food': return { icon: '🍽️', title: `${e.meal || '吃饭'} · ${e.items || ''}`, meta: `${round(e.kcal, 0)} kcal · 蛋白质 ${round(e.protein_g, 0)} g${e.note ? ' · ' + e.note : ''}`, time: e.time || '' };
+    case 'training': return { icon: '🏋️', title: e.exercise || '训练', meta: `${round(e.sets, 0)} 组 × ${round(e.reps, 0)} 次 × ${round(e.weight_kg, 1)} kg · RPE ${round(e.rpe, 1)}${e.note ? ' · ' + e.note : ''}`, time: e.time || '' };
+    case 'sleep': return { icon: '🌙', title: `睡眠 ${round(e.duration_h || hoursBetween(e.bedtime, e.wake), 2)} h`, meta: `${e.bedtime || ''} - ${e.wake || ''} · 质量 ${round(e.quality, 0)}/5${e.device_note ? ' · ' + e.device_note : ''}`, time: e.bedtime || '' };
+    case 'work': return { icon: '💻', title: e.task || '工作', meta: `${e.start || ''}-${e.end || ''} · 产出：${e.output || '未填写'} · 干扰：${e.distraction || '未填写'}`, time: e.start || '' };
+    case 'note': return { icon: '📝', title: '随笔', meta: e.text || '', time: '' };
+    default: return { icon: '•', title: e.type || '记录', meta: JSON.stringify(e), time: '' };
+  }
+}
+
+function renderTimeline() {
+  const el = $('#timeline');
+  const items = state.entries.map((entry, index) => ({ entry, index }));
+  items.sort((a, b) => String(timelineText(a.entry).time || '99:99').localeCompare(String(timelineText(b.entry).time || '99:99')));
+  $('#entryCount').textContent = `${state.entries.length} 条`;
+  if (!items.length) { el.className = 'timeline empty'; el.textContent = '还没有记录，点击“记录”开始。'; return; }
+  el.className = 'timeline';
+  el.innerHTML = items.map(({ entry, index }) => {
+    const t = timelineText(entry);
+    const cls = entry.type === 'training' ? 'training' : entry.type === 'sleep' ? 'sleep' : entry.type === 'work' ? 'work' : entry.type === 'note' ? 'note' : '';
+    return `<div class="timeline-item"><div class="timeline-icon ${cls}">${t.icon}</div><div class="timeline-body"><div class="timeline-title">${escapeHtml(t.title)}</div><div class="timeline-meta">${escapeHtml(t.meta)}</div></div><div class="timeline-time">${escapeHtml(t.time)}</div><button class="delete-btn" data-index="${index}" title="删除">×</button></div>`;
+  }).join('');
+}
+
+function fieldHtml(field, value = '') {
+  const span = field.span === 2 ? ' span-2' : '';
+  const required = field.required ? ' required' : '';
+  const placeholder = field.placeholder ? ` placeholder="${escapeHtml(field.placeholder)}"` : '';
+  const min = field.min !== undefined ? ` min="${field.min}"` : '';
+  const max = field.max !== undefined ? ` max="${field.max}"` : '';
+  const step = field.step !== undefined ? ` step="${field.step}"` : '';
+  if (field.type === 'select') {
+    const options = field.options.map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('');
+    return `<label class="${span.trim()}">${escapeHtml(field.label)}<select name="${field.name}"${required}>${options}</select></label>`;
+  }
+  return `<label class="${span.trim()}">${escapeHtml(field.label)}<input type="${field.type}" name="${field.name}" value="${escapeHtml(value)}"${placeholder}${min}${max}${step}${required}></label>`;
+}
+
+function renderRecordView() {
+  const cfg = recordConfig[state.activeRecordType];
+  $$('#recordTabs .tab').forEach(tab => tab.classList.toggle('active', tab.dataset.type === state.activeRecordType));
+  $('#formTitle').textContent = cfg.title; $('#formHint').textContent = cfg.hint;
+  $('#listTitle').textContent = cfg.listTitle; $('#listHint').textContent = cfg.listHint;
+  const defaults = state.activeRecordType === 'food' || state.activeRecordType === 'training' ? { time: nowTime() } : state.activeRecordType === 'work' ? { start: nowTime() } : {};
+  $('#recordForm').innerHTML = cfg.fields.map(f => fieldHtml(f, defaults[f.name] ?? '')).join('') + '<button class="primary-btn" type="submit">保存记录</button>';
+  renderRecordList();
+}
+
+function renderRecordList() {
+  const type = state.activeRecordType;
+  const entries = state.entries.map((entry, index) => ({ entry, index })).filter(x => x.entry.type === type);
+  const el = $('#recordList');
+  $('#listCount').textContent = `${entries.length} 条`;
+  if (!entries.length) { el.className = 'entry-list empty'; el.textContent = '暂无记录。'; return; }
+  el.className = 'entry-list';
+  el.innerHTML = entries.map(({ entry, index }) => {
+    const t = timelineText(entry);
+    return `<div class="entry-item"><div class="entry-main"><strong>${escapeHtml(t.title)}</strong><span>${escapeHtml(t.meta)}</span></div><button class="delete-btn" data-index="${index}" title="删除">×</button></div>`;
+  }).join('');
+}
+
+function summarize(entries) {
+  const food = entries.filter(e => e.type === 'food'), training = entries.filter(e => e.type === 'training'), sleep = entries.filter(e => e.type === 'sleep'), work = entries.filter(e => e.type === 'work');
+  const kcal = sum(food, 'kcal'), protein = sum(food, 'protein_g'), sets = sum(training, 'sets');
+  const volume = training.reduce((acc, t) => acc + num(t.sets) * num(t.reps) * num(t.weight_kg), 0);
+  const sleepHours = sleep.reduce((acc, s) => acc + (num(s.duration_h) || hoursBetween(s.bedtime, s.wake)), 0);
+  const qualities = sleep.map(s => num(s.quality)).filter(v => v > 0);
+  const avgQuality = qualities.length ? round(qualities.reduce((a, b) => a + b, 0) / qualities.length, 1) : 0;
+  const workHours = work.reduce((acc, w) => acc + hoursBetween(w.start, w.end), 0);
+  return { entries, counts: { food: food.length, training: training.length, sleep: sleep.length, work: work.length }, totals: { kcal: round(kcal, 1), protein_g: round(protein, 1), sets: round(sets, 1), volume_kg: round(volume, 1), sleep_h: round(sleepHours, 2), sleep_quality: avgQuality, work_h: round(workHours, 2) } };
+}
+
+function buildPromptPayload() {
+  const entries = state.entries || [], targets = state.config?.targets || {};
+  const summary = summarize(entries);
+  const lines = entries.map(e => '- ' + timelineText(e).meta);
+  const raw = lines.length ? lines.join('\n') : '（今天还没有记录。）';
+  const targetText = `蛋白质目标：${targets.protein_g ?? 140} g；热量缺口目标：${targets.calories_deficit_kcal ?? 600} kcal；睡眠目标：${targets.sleep_hours ?? 7.5} h；每周训练：${targets.training_days_per_week ?? 3} 次；深度工作目标：${targets.deep_work_hours ?? 4} h`;
+  const template = `你是一名严谨的生活教练和数据分析师。请根据我提供的 {{date}} 数据，生成一份中文日报。\n\n我的目标：\n{{targets}}\n\n请按以下结构输出：\n1. 今日一句话总结\n2. 吃饭：总热量、蛋白质、饮食质量、问题与建议\n3. 训练：训练量、强度、动作质量、恢复建议\n4. 睡眠：时长、质量、可能的影响\n5. 工作：深度工作产出、干扰、改进点\n6. 今天做得好的 3 件事\n7. 明天最重要的 3 个动作\n8. 需要我补充的数据\n\n要求：\n- 只根据数据说话；数据不足时明确说“数据不足”，不要编造。\n- 建议要具体、可执行，不要空泛鸡汤。\n- 涉及健康、医疗、用药时，提醒我咨询专业人士。\n- 不要给我投资建议。\n\n以下是今天的原始数据：\n---\n{{data}}\n---`;
+  return { prompt: template.replaceAll('{{date}}', state.date).replaceAll('{{targets}}', targetText).replaceAll('{{data}}', raw), summary, targets: targetText, raw };
+}
+
+function renderAiSummary(summary) {
+  if (!summary) { $('#aiSummary').textContent = '记录几条数据后，这里会显示摘要。'; return; }
+  const t = summary.totals || {};
+  $('#aiSummary').innerHTML = `今日已记录 <strong>${summary.entries?.length ?? 0}</strong> 条：热量 ${round(t.kcal, 0)} kcal，蛋白质 ${round(t.protein_g, 0)} g，睡眠 ${round(t.sleep_h, 2)} h，深度工作 ${round(t.work_h, 2)} h。`;
+}
+function renderReportSummary(summary) {
+  const el = $('#reportSummary');
+  if (!summary) { el.innerHTML = ''; return; }
+  const t = summary.totals || {};
+  const chips = [['热量', `${round(t.kcal, 0)} kcal`], ['蛋白质', `${round(t.protein_g, 0)} g`], ['睡眠', `${round(t.sleep_h, 2)} h`], ['深度工作', `${round(t.work_h, 2)} h`], ['训练', `${round(t.sets, 0)} 组 / ${round(t.volume_kg, 0)} kg`]];
+  el.innerHTML = chips.map(([label, value]) => `<div class="summary-chip"><span>${label}</span><strong>${value}</strong></div>`).join('');
+}
+function renderSettings() {
+  const t = state.config?.targets || {};
+  $('#settingProtein').value = t.protein_g ?? 140; $('#settingCalories').value = t.calories_deficit_kcal ?? 600; $('#settingSleep').value = t.sleep_hours ?? 7.5; $('#settingTraining').value = t.training_days_per_week ?? 3; $('#settingWork').value = t.deep_work_hours ?? 4;
+}
+function renderAll() { renderHeader(); renderMetrics(); renderTimeline(); renderRecordView(); renderAiSummary(null); renderSettings(); }
+
+function loadData() { state.entries = getEntries(state.date); renderAll(); }
+
+function generatePrompt() {
+  const payload = buildPromptPayload();
+  state.promptPayload = payload;
+  $('#dashPrompt').value = payload.prompt; $('#reportPrompt').value = payload.prompt;
+  renderAiSummary(payload.summary); renderReportSummary(payload.summary);
+  toast('AI 提示词已生成');
+}
+async function copyPrompt(text) {
+  if (!text) { toast('请先生成提示词'); return; }
+  try { await navigator.clipboard.writeText(text); toast('提示词已复制'); }
+  catch { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('提示词已复制'); }
+}
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function downloadReport() {
+  const p = buildPromptPayload(), t = p.summary.totals;
+  const report = `# ${state.date} 生活AI化日报\n\n## 数据汇总\n- 吃饭：${p.summary.counts.food} 条记录，总热量 ${t.kcal} kcal，总蛋白质 ${t.protein_g} g\n- 训练：${p.summary.counts.training} 条记录，总组数 ${t.sets} 组，估算训练容量 ${t.volume_kg} kg\n- 睡眠：${p.summary.counts.sleep} 条记录，总时长 ${t.sleep_h} h，平均质量 ${t.sleep_quality}/5\n- 工作：${p.summary.counts.work} 条记录，总时长 ${t.work_h} h\n\n## AI 日报提示词\n\`\`\`text\n${p.prompt}\n\`\`\`\n`;
+  downloadBlob(new Blob([report], { type: 'text/markdown;charset=utf-8' }), `日报_${state.date}.md`);
+  toast('Markdown 日报已下载');
+}
+function exportData() {
+  const data = { version: 1, exportedAt: new Date().toISOString(), config: state.config, store: loadStore() };
+  downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' }), `life-ai-backup-${state.date}.json`);
+  toast('备份已导出');
+}
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (data.config) { state.config = data.config; saveConfig(state.config); }
+      if (data.store) { saveStore(data.store); }
+      loadData(); toast('数据已导入');
+    } catch { toast('导入失败：文件格式不正确'); }
+  };
+  reader.readAsText(file);
+}
+
+function bindNav() {
+  $$('.bottom-nav-item').forEach(btn => btn.addEventListener('click', () => { location.hash = btn.dataset.view; switchView(btn.dataset.view); }));
+  $('#jumpRecord').addEventListener('click', () => { location.hash = 'record'; switchView('record'); });
+}
+function bindDate() { $('#datePicker').addEventListener('change', e => { state.date = e.target.value || todayStr(); loadData(); }); }
+function bindRecordTabs() {
+  $$('#recordTabs .tab').forEach(tab => tab.addEventListener('click', () => { state.activeRecordType = tab.dataset.type; renderRecordView(); }));
+  $('#recordForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const fd = new FormData(e.target), entry = { type: state.activeRecordType };
+    for (const [key, value] of fd.entries()) {
+      const field = recordConfig[state.activeRecordType].fields.find(f => f.name === key);
+      entry[key] = field?.type === 'number' ? num(value) : value;
+    }
+    addEntry(state.date, entry); toast('记录已保存'); loadData(); switchView('record');
+  });
+}
+function bindDashboard() { $('#dashPromptBtn').addEventListener('click', generatePrompt); $('#dashCopyBtn').addEventListener('click', () => copyPrompt($('#dashPrompt').value)); $('#dashReportBtn').addEventListener('click', downloadReport); }
+function bindReport() { $('#reportPromptBtn').addEventListener('click', generatePrompt); $('#reportCopyBtn').addEventListener('click', () => copyPrompt($('#reportPrompt').value)); $('#reportDownloadBtn').addEventListener('click', downloadReport); }
+function bindSettings() {
+  $('#settingsForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const next = JSON.parse(JSON.stringify(state.config || DEFAULT_CONFIG));
+    next.targets = { protein_g: num($('#settingProtein').value), calories_deficit_kcal: num($('#settingCalories').value), sleep_hours: num($('#settingSleep').value), training_days_per_week: num($('#settingTraining').value), deep_work_hours: num($('#settingWork').value) };
+    state.config = next; saveConfig(next); renderMetrics(); toast('设置已保存');
+  });
+  $('#exportBtn').addEventListener('click', exportData);
+  $('#importInput').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; });
+  $('#clearDayBtn').addEventListener('click', () => { if (confirm('确定清空今天的数据吗？此操作不可恢复。')) { setEntries(state.date, []); loadData(); toast('今天的数据已清空'); } });
+  $('#installBtn').addEventListener('click', async () => { if (state.deferredPrompt) { state.deferredPrompt.prompt(); state.deferredPrompt = null; $('#installBtn').style.display = 'none'; } });
+}
+function bindDelete() {
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.delete-btn');
+    if (!btn) return;
+    const index = Number(btn.dataset.index);
+    if (!Number.isInteger(index)) return;
+    if (confirm('确定删除这条记录吗？')) { deleteEntry(state.date, index); toast('已删除'); loadData(); switchView('record'); }
+  });
+}
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+}
+function bindInstall() {
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); state.deferredPrompt = e; $('#installBtn').style.display = 'inline-flex'; });
+}
+
+async function init() {
+  state.config = loadConfig();
+  bindNav(); bindDate(); bindRecordTabs(); bindDashboard(); bindReport(); bindSettings(); bindDelete(); bindInstall(); registerServiceWorker();
+  renderHeader(); await loadData();
+  const hash = location.hash.replace('#', '');
+  if (viewMeta[hash]) switchView(hash);
+}
+window.addEventListener('hashchange', () => { const view = location.hash.replace('#', ''); if (viewMeta[view]) switchView(view); });
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
